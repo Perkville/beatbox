@@ -1,5 +1,4 @@
 from ._beatbox import _tSObjectNS
-from types import ListType, TupleType
 import datetime
 from . import python_client
 import re
@@ -31,7 +30,7 @@ def marshall(fieldtype, fieldname, xml, ns=_tSObjectNS):
 
 
 def register(fieldtypes, func):
-    if type(fieldtypes) not in (ListType, TupleType):
+    if type(fieldtypes) not in (list, tuple):
         fieldtypes = [fieldtypes]
     for t in fieldtypes:
         _marshallers[t] = func

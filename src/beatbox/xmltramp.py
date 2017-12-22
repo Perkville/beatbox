@@ -5,9 +5,6 @@ __author__ = "Aaron Swartz"
 __credits__ = "Many thanks to pjz, bitsko, and DanC."
 __copyright__ = "(C) 2003 Aaron Swartz. GNU GPL 2."
 
-if not hasattr(__builtins__, 'True'):
-    True, False = 1, 0
-
 
 def isstr(f):
     return isinstance(f, type('')) or isinstance(f, type(''))
@@ -343,13 +340,13 @@ def unittest():
 
     try:
         d._doesnotexist
-        raise "ExpectedError", "but found success. Damn."
+        raise Exception("but found success. Damn.")
     except AttributeError:
         pass
     assert d.bar._name == 'bar'
     try:
         d.doesnotexist
-        raise "ExpectedError", "but found success. Damn."
+        raise Exception("but found success. Damn.")
     except AttributeError:
         pass
 

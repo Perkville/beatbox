@@ -1,7 +1,6 @@
 from ._beatbox import _tPartnerNS, _tSObjectNS
 from ._beatbox import Client as BaseClient
 from .marshall import marshall
-from types import TupleType, ListType
 from .xmltramp import Namespace
 import copy
 import re
@@ -133,7 +132,7 @@ class Client(BaseClient):
 
     def describeSObjects(self, sObjectTypes):
         res = BaseClient.describeSObjects(self, sObjectTypes)
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         data = list()
         for r in res:
@@ -186,7 +185,7 @@ class Client(BaseClient):
     def create(self, sObjects):
         preparedObjects = _prepareSObjects(sObjects)
         res = BaseClient.create(self, preparedObjects)
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         data = list()
         for r in res:
@@ -205,7 +204,7 @@ class Client(BaseClient):
         resultSet = BaseClient.retrieve(self, fields, sObjectType, ids)
         type_data = self.describeSObjects(sObjectType)[0]
 
-        if type(resultSet) not in (TupleType, ListType):
+        if type(resultSet) not in (tuple, list):
             if isnil(resultSet):
                 resultSet = list()
             else:
@@ -222,7 +221,7 @@ class Client(BaseClient):
     def update(self, sObjects):
         preparedObjects = _prepareSObjects(sObjects)
         res = BaseClient.update(self, preparedObjects)
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         data = list()
         for r in res:
@@ -332,7 +331,7 @@ class Client(BaseClient):
 
     def delete(self, ids):
         res = BaseClient.delete(self, ids)
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         data = list()
         for r in res:
@@ -350,7 +349,7 @@ class Client(BaseClient):
     def upsert(self, externalIdName, sObjects):
         preparedObjects = _prepareSObjects(sObjects)
         res = BaseClient.upsert(self, externalIdName, preparedObjects)
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         data = list()
         for r in res:
@@ -369,7 +368,7 @@ class Client(BaseClient):
     def getDeleted(self, sObjectType, start, end):
         res = BaseClient.getDeleted(self, sObjectType, start, end)
         res = res[_tPartnerNS.deletedRecords:]
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         data = list()
         for r in res:
@@ -384,7 +383,7 @@ class Client(BaseClient):
     def getUpdated(self, sObjectType, start, end):
         res = BaseClient.getUpdated(self, sObjectType, start, end)
         res = res[_tPartnerNS.ids:]
-        if type(res) not in (TupleType, ListType):
+        if type(res) not in (tuple, list):
             res = [res]
         return [str(r) for r in res]
 
