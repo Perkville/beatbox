@@ -14,12 +14,12 @@ def benchmark(func):
         # temporarily disable garbage collection
         gc.disable()
         t0 = time()
-        for i in xrange(0, BENCHMARK_REPS):
+        for i in range(0, BENCHMARK_REPS):
             func(self)
         t1 = time()
         gc.enable()
         elapsed = t1 - t0
-        print "\n%s: %s\n" % (func.__name__, elapsed)
+        print("\n%s: %s\n" % (func.__name__, elapsed))
     return benchmarked_func
 
 
@@ -65,9 +65,9 @@ class TestUtils(unittest.TestCase):
             Birthdate=datetime.date(1970, 1, 4)
             )
         res = svc.create([data])
-        self.failUnless(type(res) in (ListType, TupleType))
-        self.failUnless(len(res) == 1)
-        self.failUnless(res[0]['success'])
+        self.assertTrue(type(res) in (ListType, TupleType))
+        self.assertTrue(len(res) == 1)
+        self.assertTrue(res[0]['success'])
         id = res[0]['id']
         self._todelete.append(id)
         contacts = svc.retrieve(

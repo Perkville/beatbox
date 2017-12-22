@@ -10,7 +10,7 @@ if not hasattr(__builtins__, 'True'):
 
 
 def isstr(f):
-    return isinstance(f, type('')) or isinstance(f, type(u''))
+    return isinstance(f, type('')) or isinstance(f, type(''))
 
 
 def islst(f):
@@ -37,7 +37,7 @@ class Element:
             name = name[1]
         if attrs:
             na = {}
-            for k in attrs.keys():
+            for k in list(attrs.keys()):
                 if islst(k) and k[0] is None:
                     na[k[1]] = attrs[k]
                 else:
@@ -49,7 +49,7 @@ class Element:
         self._dir = children or []
 
         prefixes = prefixes or {}
-        self._prefixes = dict(zip(prefixes.values(), prefixes.keys()))
+        self._prefixes = dict(list(zip(list(prefixes.values()), list(prefixes.keys()))))
 
         if prefixes:
             self._dNS = prefixes.get(None, None)
@@ -69,8 +69,8 @@ class Element:
         def arep(a, inprefixes, addns=1):
             out = ''
 
-            for p in self._prefixes.keys():
-                if p not in inprefixes.keys():
+            for p in list(self._prefixes.keys()):
+                if p not in list(inprefixes.keys()):
                     if addns:
                         out += ' xmlns'
                     if addns and self._prefixes[p]:
@@ -79,18 +79,18 @@ class Element:
                         out += '="'+quote(p, False)+'"'
                     inprefixes[p] = self._prefixes[p]
 
-            for k in a.keys():
+            for k in list(a.keys()):
                 out += ' ' + qname(k, inprefixes) + '="' + quote(a[k], False) + '"'
 
             return out
 
-        inprefixes = inprefixes or {u'http://www.w3.org/XML/1998/namespace': 'xml'}
+        inprefixes = inprefixes or {'http://www.w3.org/XML/1998/namespace': 'xml'}
 
         # need to call first to set inprefixes:
         attributes = arep(self._attrs, inprefixes, recursive)
         out = '<' + qname(self._name, inprefixes) + attributes
 
-        if (not self._dir and self._name[0] in empty.keys()
+        if (not self._dir and self._name[0] in list(empty.keys())
                 and self._name[1] in empty[self._name[0]]):
             out += ' />'
             return out
@@ -126,7 +126,7 @@ class Element:
     def __unicode__(self):
         text = ''
         for x in self._dir:
-            text += unicode(x)
+            text += str(x)
         return ' '.join(text.split())
 
     def __str__(self):
@@ -233,7 +233,7 @@ class Element:
 
     def __call__(self, *_pos, **_set):
         if _set:
-            for k in _set.keys():
+            for k in list(_set.keys()):
                 self._attrs[k] = _set[k]
         if len(_pos) > 1:
             for i in range(0, len(_pos), 2):
@@ -268,7 +268,7 @@ class Seeder(EntityResolver, DTDHandler, ContentHandler, ErrorHandler):
         ContentHandler.__init__(self)
 
     def startPrefixMapping(self, prefix, uri):
-        if not self.prefixes.has_key(prefix):
+        if prefix not in self.prefixes:
             self.prefixes[prefix] = []
         self.prefixes[prefix].append(uri)
 
@@ -286,7 +286,7 @@ class Seeder(EntityResolver, DTDHandler, ContentHandler, ErrorHandler):
 
         attrs = dict(attrs)
         newprefixes = {}
-        for k in self.prefixes.keys():
+        for k in list(self.prefixes.keys()):
             newprefixes[k] = self.prefixes[k][-1]
 
         self.stack.append(Element(name, attrs, prefixes=newprefixes.copy()))
@@ -320,13 +320,13 @@ def seed(fileobj):
 
 
 def parse(text):
-    from StringIO import StringIO
+    from io import StringIO
     return seed(StringIO(text))
 
 
 def load(url):
-    import urllib
-    return seed(urllib.urlopen(url))
+    import urllib.request, urllib.parse, urllib.error
+    return seed(urllib.request.urlopen(url))
 
 
 def unittest():

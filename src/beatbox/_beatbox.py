@@ -5,18 +5,19 @@ __author__ = "Simon Fell et al"
 __credits__ = "Mad shouts to the sforce possie"
 __copyright__ = "(C) 2006 Simon Fell. GNU GPL 2."
 
-import httplib
+import http.client
 import logging
 import socket
-from urlparse import urlparse
-from StringIO import StringIO
+from urllib.parse import urlparse
+from io import StringIO
 import gzip
 import datetime
-import xmltramp
-from xmltramp import islst
+from . import xmltramp
+from .xmltramp import islst
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.saxutils import quoteattr
 from xml.sax.xmlreader import AttributesNSImpl
+import collections
 
 # global constants for namespace strings, used during serialization
 _partnerNs = "urn:partner.soap.sforce.com"
@@ -41,8 +42,8 @@ logger = logging.getLogger('beatbox')
 
 def makeConnection(scheme, host):
     if forceHttp or scheme.upper() == 'HTTP':
-        return httplib.HTTPConnection(host)
-    return httplib.HTTPSConnection(host)
+        return http.client.HTTPConnection(host)
+    return http.client.HTTPSConnection(host)
 
 
 # the main sforce client proxy class
@@ -53,7 +54,7 @@ class Client:
         self.__conn = None
 
     def __del__(self):
-        if callable(getattr(self.__conn, 'close', None)):
+        if isinstance(getattr(self.__conn, 'close', None), collections.Callable):
             self.__conn.close()
 
     # login, the serverUrl and sessionId are automatically handled,
@@ -155,7 +156,7 @@ class BeatBoxXmlGenerator(XMLGenerator):
             self._out.write(' xmlns:%s="%s"' % pair)
         self._undeclared_ns_maps = []
 
-        for (name, value) in attrs.items():
+        for (name, value) in list(attrs.items()):
             self._out.write(' %s=%s' % (self.makeName(name), quoteattr(value)))
         self._out.write('>')
 
@@ -207,7 +208,7 @@ class XmlWriter:
         elif isinstance(s, datetime.date):
             # todo, try isoformat
             s = "%04d-%02d-%02d" % (s.year, s.month, s.day)
-        elif isinstance(s, (int, float, long)):
+        elif isinstance(s, (int, float)):
             s = str(s)
         self.xg.characters(s)
 
@@ -320,7 +321,7 @@ class SoapEnvelope:
                 conn.request("POST", path, self.makeEnvelope(), headers)
                 response = conn.getresponse()
                 rawResponse = response.read()
-            except (httplib.HTTPException, socket.error):
+            except (http.client.HTTPException, socket.error):
                 if conn is not None:
                     conn.close()
                     conn = None
@@ -382,7 +383,7 @@ class AuthenticatedRequest(SoapEnvelope):
             s.startElement(_partnerNs, elemName)
             # type has to go first
             s.writeStringElement(_sobjectNs, "type", sObjects['type'])
-            for fn in sObjects.keys():
+            for fn in list(sObjects.keys()):
                 if (fn != 'type'):
                     s.writeStringElement(_sobjectNs, fn, sObjects[fn])
             s.endElement()

@@ -1,10 +1,11 @@
-from _beatbox import _tPartnerNS, _tSObjectNS
-from _beatbox import Client as BaseClient
-from marshall import marshall
+from ._beatbox import _tPartnerNS, _tSObjectNS
+from ._beatbox import Client as BaseClient
+from .marshall import marshall
 from types import TupleType, ListType
-from xmltramp import Namespace
+from .xmltramp import Namespace
 import copy
 import re
+from functools import reduce
 
 _tSchemaInstanceNS = Namespace('http://www.w3.org/2001/XMLSchema-instance')
 _tSchemaNS = Namespace('http://www.w3.org/2001/XMLSchema')
@@ -32,7 +33,7 @@ class QueryRecordSet(list):
             self.append(r)
         self.done = done
         self.size = size
-        for k, v in kw.items():
+        for k, v in list(kw.items()):
             setattr(self, k, v)
 
     @property
@@ -43,7 +44,7 @@ class QueryRecordSet(list):
         if type(n) == type(''):
             try:
                 return getattr(self, n)
-            except AttributeError, n:
+            except AttributeError as n:
                 raise KeyError
         else:
             return list.__getitem__(self, n)
@@ -52,11 +53,11 @@ class QueryRecordSet(list):
 class SObject(object):
 
     def __init__(self, **kw):
-        for k, v in kw.items():
+        for k, v in list(kw.items()):
             setattr(self, k, v)
 
     def marshall(self, fieldname, xml):
-        if self.fields.has_key(fieldname):
+        if fieldname in self.fields:
             field = self.fields[fieldname]
         else:
             return marshall(DEFAULT_FIELD_TYPE, fieldname, xml)
@@ -244,7 +245,7 @@ class Client(BaseClient):
             types_descs = self.describeSObjects(types)
         else:
             types_descs = []
-        return dict(map(lambda t, d: (t, d), types, types_descs))
+        return dict(list(map(lambda t, d: (t, d), types, types_descs)))
 
     def _extractRecord(self, r):
         record = QueryRecord()
@@ -412,7 +413,7 @@ class Client(BaseClient):
 class Field(object):
 
     def __init__(self, **kw):
-        for k, v in kw.items():
+        for k, v in list(kw.items()):
             setattr(self, k, v)
 
     def marshall(self, xml):
@@ -430,7 +431,7 @@ def _prepareSObjects(sObjects):
            or None values.
         """
         fieldsToNull = []
-        for k, v in field_dict.items():
+        for k, v in list(field_dict.items()):
             if v is None:
                 fieldsToNull.append(k)
                 field_dict[k] = []

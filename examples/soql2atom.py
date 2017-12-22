@@ -21,7 +21,7 @@ __version__ = "1.0"
 __author__ = "Simon Fell"
 __copyright__ = "(C) 2006 Simon Fell. GNU GPL 2."
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 from xml.sax.xmlreader import AttributesNSImpl
 import base64
 import beatbox
@@ -63,11 +63,11 @@ def soql2atom(loginResult, soql, title):
     atom_ns = "http://www.w3.org/2005/Atom"
     ent_ns = "urn:sobject.enterprise.soap.sforce.com"
 
-    print "content-type: application/atom+xml"
-    doGzip = os.environ.has_key("HTTP_ACCEPT_ENCODING") and "gzip" in string.lower(os.environ["HTTP_ACCEPT_ENCODING"]).split(',')
+    print("content-type: application/atom+xml")
+    doGzip = "HTTP_ACCEPT_ENCODING" in os.environ and "gzip" in string.lower(os.environ["HTTP_ACCEPT_ENCODING"]).split(',')
     if doGzip:
-        print "content-encoding: gzip"
-    print ""
+        print("content-encoding: gzip")
+    print("")
     x = beatbox.XmlWriter(doGzip)
     x.startPrefixMapping("a", atom_ns)
     x.startPrefixMapping("s", ent_ns)
@@ -86,7 +86,7 @@ def soql2atom(loginResult, soql, title):
     x.writeStringElement(atom_ns, "updated", datetime.datetime.utcnow().isoformat() + "Z")
     x.writeStringElement(atom_ns, "id", thisUrl + "&userid=" + str(loginResult[beatbox._tPartnerNS.userId]))
     x.characters("\n")
-    type = AttributesNSImpl({(None, u"type"): "html"}, {(None, u"type"): u"type"})
+    type = AttributesNSImpl({(None, "type"): "html"}, {(None, "type"): "type"})
     for row in qr[sf.records:]:
         x.startElement(atom_ns, "entry")
         desc = ""
@@ -108,7 +108,7 @@ def soql2atom(loginResult, soql, title):
         x.characters("\n")
         x.endElement()  # entry
     x.endElement()  # feed
-    print x.endDocument()
+    print(x.endDocument())
 
 
 def writeLink(x, namespace, localname, rel, type, href):
@@ -120,29 +120,29 @@ def writeLink(x, namespace, localname, rel, type, href):
 
 
 def authenticationRequired(message="Unauthorized"):
-    print "status: 401 Unauthorized"
-    print "WWW-authenticate: Basic realm=""www.salesforce.com"""
-    print "content-type: text/plain"
-    print ""
-    print message
+    print("status: 401 Unauthorized")
+    print("WWW-authenticate: Basic realm=""www.salesforce.com""")
+    print("content-type: text/plain")
+    print("")
+    print(message)
 
 
-if not os.environ.has_key('X_HTTP_AUTHORIZATION') or os.environ['X_HTTP_AUTHORIZATION'] == '':
+if 'X_HTTP_AUTHORIZATION' not in os.environ or os.environ['X_HTTP_AUTHORIZATION'] == '':
     authenticationRequired()
 else:
     auth = os.environ['X_HTTP_AUTHORIZATION']
     (username, password) = base64.decodestring(auth.split(" ")[1]).split(':')
     form = cgi.FieldStorage()
-    if not form.has_key('soql'):
+    if 'soql' not in form:
         raise Exception("Must provide the SOQL query to run via the soql queryString parameter")
     soql = form.getvalue("soql")
     title = "SOQL2ATOM : " + soql
-    if form.has_key("title"):
+    if "title" in form:
         title = form.getvalue("title")
     try:
         lr = svc.login(username, password)
         soql2atom(lr, soql, title)
-    except beatbox.SoapFaultError, sfe:
+    except beatbox.SoapFaultError as sfe:
         if (sfe.faultCode == 'INVALID_LOGIN'):
             authenticationRequired(sfe.faultString)
         else:

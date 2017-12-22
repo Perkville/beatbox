@@ -1,7 +1,7 @@
-from _beatbox import _tSObjectNS
+from ._beatbox import _tSObjectNS
 from types import ListType, TupleType
 import datetime
-import python_client
+from . import python_client
 import re
 
 
@@ -47,7 +47,7 @@ def textMarshaller(fieldname, xml, ns):
     node = xml[getattr(ns, fieldname)]
     text = ''
     for x in node._dir:
-        text += unicode(x)
+        text += str(x)
     return text.encode('utf-8')
 register(texttypes, textMarshaller)
 
